@@ -1,0 +1,47 @@
+data _null_;
+*-- infile datalines truncover length=len;
+infile '/user/pali05/Adventofcode2024/text3.txt' truncover length=len;
+
+*-- read lines, store length in len --*;
+input rad $varying32767. len  ;
+
+*-- mul(x,y) is max 12 char --*;
+length test $ 12;
+
+*-- total counter *--;
+retain total;
+
+*-- mul enable toggle default 1 --*;
+retain enable 1;
+
+*-- test each position in rad --*;
+do i=1 to len;
+  *-- toggle mule enable --*;
+  if substr(rad,i,7)="don't()" then enable=0;
+  if substr(rad,i,4)='do()' then enable=1;
+
+  *-- look for mul( and keep 12 chars --*;
+  test=substr(rad,i,12);
+  if substr(test,1,4)='mul(' then do;
+     testlen=length(test);
+
+     *-- Keep until first ) --*;
+     test=scan(test,1,')');
+     
+     *-- if ) is found, test is shorter --*;
+     if length(test)<testlen then do;
+        put test=;
+        term1=scan(test,2,'(,');
+        term2=scan(test,3,'(,');
+        
+        *-- just multiply, don't check if terms is valid numbers --*;
+        mult=term1*term2*enable;
+        put mult=;
+        total=sum(total,mult);
+     end; 
+  end;
+end;
+put total=;
+datalines;
+xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
+;
